@@ -1,14 +1,17 @@
-import { useState } from 'react'
-import styles from './App.module.scss'
+import Header from 'components/Header'
+import { HashRouter, Route, Routes, Navigate } from "react-router-dom"
+import ProductsPage from 'pages/ProductsPage'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div className={styles.test}>
-        fdsf
-      </div>
+      <Header />
+      <HashRouter>
+        <Routes>
+          <Route path="/" element={<ProductsPage />}></Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </HashRouter>
     </>
   )
 }
