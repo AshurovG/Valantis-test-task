@@ -3,14 +3,12 @@ import axios from 'axios'
 import styles from './ProductsPage.module.scss'
 import Button from 'components/Button'
 import md5 from 'md5';
+import CardsList from 'components/CardsList';
+import { ProductData } from '../../../types';
 
 const ProductsPage = () => {
     const [currentOffset, setCurrentOffset] = useState(0)
-
-    function generateAuthString(password: string) {
-        const timestamp = new Date().toISOString().slice(0,  10).replace(/-/g, '');
-        return md5(`${password}_${timestamp}`);
-    }
+    const [products, setProducts] = useState<ProductData[]>([])
 
     const date = new Date();
     const year = date.getUTCFullYear();
@@ -50,21 +48,22 @@ const ProductsPage = () => {
                 "params": {"ids": ids}
             }
         })
+        setProducts(response.data.result)
         } catch (error) {
             throw error
         }
     }
 
     useEffect(() => {
-        // getProducts()
         getProductsIds()
     }, [])
 
     return (
         <div className={styles.product__page}> 
             <div className={styles['product__page-wrapper']}>
-                <h1 className={styles['product__page-title']}>Products</h1>
-                <h3 className={styles['product__page-subtitle']}>Here you can get acquainted with the products of our company! We have a lot of discounts and new products</h3>
+                <h1 className={styles['product__page-title']}>Наши продукты</h1>
+                <h3 className={styles['product__page-subtitle']}>Здесь вы можете ознакомиться с продукцией нашей компании! У нас много скидок и новинок</h3>
+                {products !== null && <CardsList products={products}/>}
             </div>
             <Button>dfdsf</Button>
         </div>
