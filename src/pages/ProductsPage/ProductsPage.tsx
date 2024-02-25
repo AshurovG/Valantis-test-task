@@ -4,9 +4,9 @@ import styles from './ProductsPage.module.scss'
 import Button from 'components/Button'
 import md5 from 'md5';
 import CardsList from 'components/CardsList';
-// import FilterBlock from 'components/FilterBlock/FilterBlock';
 import MultiDropdown from 'components/MultiDropdown';
 import Input from 'components/Input';
+import SliderFilter from 'components/Slider';
 import { ProductData } from '../../../types';
 import { OptionData } from '../../../types';
 
@@ -16,10 +16,12 @@ const ProductsPage = () => {
     const [allBrands, setAllBrands] = useState<OptionData[]>([])
     const [titleValue, setTitleValue] = useState('')
     const [brandValue, setBrandValue] = useState<OptionData[]>([])
+    const [sliderValue, setSliderValue] = useState(100);
     const date = new Date();
     const year = date.getUTCFullYear();
-    const month = date.getUTCMonth() +  1; // Месяцы начинаются с  0, поэтому добавляем  1
+    const month = date.getUTCMonth() +  1;
     const day = date.getUTCDate();
+    
     const formattedDate = `${year}${month <  10 ? '0' : ''}${month}${day <  10 ? '0' : ''}${day}`
 
     const getProductsIds = async () => {
@@ -30,8 +32,8 @@ const ProductsPage = () => {
                 'X-Auth' : md5(`Valantis_${formattedDate}`)
             },
             data: {
-                "action": "get_ids",
-                "params": {"offset": currentOffset, "limit": 50}
+                "action": "filter",
+                "params": {"brand": "Piaget"}
             }
         })
         getProducts(response.data.result)
@@ -89,7 +91,7 @@ const ProductsPage = () => {
     //             },
     //             data: {
     //                 "action": "filter",
-    //                 "params": {"price": 17500.0}
+    //                 "params": {"brand": 17500.0}
     //             }
     //         })
     //     } catch (error) {
@@ -98,20 +100,12 @@ const ProductsPage = () => {
     // }
 
     const handleBrandChange = (options: OptionData[]) => {
-        const counts: {[key: string]: boolean} = {}
-        const filteredOptions: OptionData[] = []
-      
-        for (const option of options) {
-            if (!counts[option.value]) {
-                counts[option.value] = false
-              }
-              counts[option.value] = true
-          if (counts[option.value] === true) {
-            filteredOptions.push(option)
-          }
-        }
-      
-        setBrandValue(filteredOptions)
+        const newValue = options[options.length -  1];
+        setBrandValue([newValue]);
+    };
+    
+    const handleSliderChange = (value: number) => {
+        setSliderValue(value);
     };
 
     const getDropdownTitle = (options: OptionData[]) => {
@@ -121,7 +115,6 @@ const ProductsPage = () => {
     useEffect(() => {
         getProductsIds()
         getBrands()
-        // filterProducts()
     }, [])
 
     return (
@@ -133,6 +126,12 @@ const ProductsPage = () => {
                     <Input value={titleValue} onChange={setTitleValue}/>
                     <Button>Найти</Button>
                     {allBrands && <MultiDropdown options={allBrands} value={brandValue} onChange={handleBrandChange} getTitle={getDropdownTitle}/>}
+                    <SliderFilter
+                                onChangeValue={handleSliderChange}
+                                minimum={100}
+                                maximum={100000}
+                                title="Цена товара:"
+                            />
                 </div>
                 {products !== null && <CardsList products={products}/>}
             </div>
