@@ -4,3 +4,8 @@ export type ProductData = {
     brand: string
     price: number
 }
+
+export type OptionData = {
+    key: string
+    value: string
+}

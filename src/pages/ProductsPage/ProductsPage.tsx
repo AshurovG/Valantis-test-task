@@ -4,14 +4,18 @@ import styles from './ProductsPage.module.scss'
 import Button from 'components/Button'
 import md5 from 'md5';
 import CardsList from 'components/CardsList';
-import FilterBlock from 'components/FilterBlock/FilterBlock';
+// import FilterBlock from 'components/FilterBlock/FilterBlock';
+import MultiDropdown from 'components/MultiDropdown';
+import Input from 'components/Input';
 import { ProductData } from '../../../types';
+import { OptionData } from '../../../types';
 
 const ProductsPage = () => {
     const [currentOffset, setCurrentOffset] = useState(0)
     const [products, setProducts] = useState<ProductData[]>([])
-    const [allBrands, setAllBrands] = useState<string[]>()
-
+    const [allBrands, setAllBrands] = useState<OptionData[]>([])
+    const [titleValue, setTitleValue] = useState('')
+    const [brandValue, setBrandValue] = useState<OptionData[]>([])
     const date = new Date();
     const year = date.getUTCFullYear();
     const month = date.getUTCMonth() +  1; // Месяцы начинаются с  0, поэтому добавляем  1
@@ -69,16 +73,55 @@ const ProductsPage = () => {
         })
         const filteredBrands = response.data.result.filter((brand: string) => brand !== null);
         const uniqueBrands = filteredBrands.filter((brand: string, index: number, self: string[]) => self.indexOf(brand) === index);
-        console.log(uniqueBrands)
-        setAllBrands(uniqueBrands);
+        const brandsAsKeyValueObjects = uniqueBrands.map((brand: string) => ({ key: brand, value: brand }));
+        setAllBrands(brandsAsKeyValueObjects);
         } catch (error) {
             throw error
         }
     }
 
+    // const filterProducts = async () => {
+    //     try {
+    //         const response = await axios(`http://api.valantis.store:40000/`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'X-Auth' : md5(`Valantis_${formattedDate}`)
+    //             },
+    //             data: {
+    //                 "action": "filter",
+    //                 "params": {"price": 17500.0}
+    //             }
+    //         })
+    //     } catch (error) {
+    //         throw error
+    //     }
+    // }
+
+    const handleBrandChange = (options: OptionData[]) => {
+        const counts: {[key: string]: boolean} = {}
+        const filteredOptions: OptionData[] = []
+      
+        for (const option of options) {
+            if (!counts[option.value]) {
+                counts[option.value] = false
+              }
+              counts[option.value] = true
+          if (counts[option.value] === true) {
+            filteredOptions.push(option)
+          }
+        }
+      
+        setBrandValue(filteredOptions)
+    };
+
+    const getDropdownTitle = (options: OptionData[]) => {
+        return options.map((option) => option.value).join(', ') || 'Выберите бренд';
+    };
+
     useEffect(() => {
         getProductsIds()
         getBrands()
+        // filterProducts()
     }, [])
 
     return (
@@ -86,7 +129,11 @@ const ProductsPage = () => {
             <div className={styles['product__page-wrapper']}>
                 <h1 className={styles['product__page-title']}>Наши продукты</h1>
                 <h3 className={styles['product__page-subtitle']}>Здесь вы можете ознакомиться с продукцией нашей компании! У нас много скидок и новинок</h3>
-                <FilterBlock></FilterBlock>
+                <div className={styles.filter}>
+                    <Input value={titleValue} onChange={setTitleValue}/>
+                    <Button>Найти</Button>
+                    {allBrands && <MultiDropdown options={allBrands} value={brandValue} onChange={handleBrandChange} getTitle={getDropdownTitle}/>}
+                </div>
                 {products !== null && <CardsList products={products}/>}
             </div>
             <Button>dfdsf</Button>
