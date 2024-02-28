@@ -7,5 +7,5 @@ export type ProductData = {
 
 export type OptionData = {
     key: string
-    value: string
+    value: any
 }

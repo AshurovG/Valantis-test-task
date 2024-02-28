@@ -11,12 +11,6 @@
   cursor: pointer;
 
   &:hover {
-    // border-color: $brand;
-    background-color: #410000;
-    // color: $brand;
-  }
-  &:disabled {
-    background-color: #634242d1;
-    cursor: default;
+    background-color: $brand-hover;
   }
 }

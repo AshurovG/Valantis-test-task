@@ -1,4 +1,4 @@
-import React, { HtmlHTMLAttributes, useState } from 'react';
+import React from 'react';
 import styles from './MultiDropdown.module.scss'
 import cn from 'clsx'
 import Input from 'components/Input';

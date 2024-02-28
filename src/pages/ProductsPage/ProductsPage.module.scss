@@ -25,4 +25,50 @@
         margin: 0 auto;
         margin-bottom: 30px;
     }
+
+    &-caption {
+        font-size: 20px;
+        margin-bottom: 15px;
+        font-weight: 400;
+    }
+
+    &-filter {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        gap: 30px;
+        align-items: flex-start;
+        margin-bottom: 30px;
+
+        &-search {
+            display: grid;
+            grid-template-rows: auto  1fr;
+            grid-template-columns:  1fr  1fr;
+            gap: 30px;
+        }
+        
+        &-search > :nth-child(1) {
+            grid-column:  1 / -1;
+        }
+        
+        &-search > :nth-child(2),
+        &-search > :nth-child(3) {
+            grid-row:  2;
+        }
+
+        &-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        &-btn {
+            width: 200px;
+            height: 78px;
+        }
+
+        &-input {
+            box-shadow: $box-shadow;
+        }
+    }
 }

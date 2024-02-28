@@ -7,6 +7,7 @@ button {
 
 .dropdown {
     position: relative;
+    box-shadow: $box-shadow;
 
     &_disabled {
         pointer-events: none;
