@@ -18,6 +18,7 @@ const ProductsPage = () => {
     const [titleValue, setTitleValue] = useState('')
     const [brandValue, setBrandValue] = useState<OptionData[]>([])
     const [sliderValue, setSliderValue] = useState(100);
+    const [isLoading, setIsloading] = useState(true)
     const date = new Date();
     const year = date.getUTCFullYear();
     const month = date.getUTCMonth() +  1;
@@ -26,6 +27,7 @@ const ProductsPage = () => {
     const formattedDate = `${year}${month <  10 ? '0' : ''}${month}${day <  10 ? '0' : ''}${day}`
 
     const getProductsIds = async () => {
+        setIsloading(true)
         try {
             const response = await axios(`http://api.valantis.store:40000/`, {
             method: 'POST',
@@ -55,6 +57,8 @@ const ProductsPage = () => {
                 "params": {"ids": ids}
             }
         })
+
+        setIsloading(false)
         setProducts(response.data.result)
         } catch (error) {
             throw error
@@ -83,6 +87,7 @@ const ProductsPage = () => {
     }
 
     const filterProducts = async (option: OptionData) => {
+        setIsloading(true)
         try {
             const response = await axios(`http://api.valantis.store:40000/`, {
                 method: 'POST',
@@ -163,7 +168,7 @@ const ProductsPage = () => {
                         <Button className={styles['product__page-filter-btn']} onClick={() => clearData()}>Очистить</Button>
                     </div>
                 </div>
-                {products !== null && <CardsList products={products}/>}
+                {products !== null && <CardsList isLoading={isLoading} products={products}/>}
             </div>
         </div>
     )

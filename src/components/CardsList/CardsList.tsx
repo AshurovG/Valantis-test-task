@@ -2,13 +2,20 @@ import React from 'react'
 import styles from './CardsList.module.scss'
 import Card from 'components/Card'
 import { ProductData } from '../../../types'
+import Skeleton from 'components/Skeleton'
 
-const CardsList: React.FC<{products: ProductData[]}> = ({products}) => {
+export type CardListProps = {
+  products: ProductData[]
+  isLoading: boolean
+}
+
+const CardsList: React.FC<CardListProps> = ({products, isLoading}) => {
   return (
     <div className={styles.cards}>
-        { products.map((product) => 
-        <Card product={product}/>)
-        }
+        {isLoading ? [...new Array(9)].map((_, index) => <Skeleton key={index} />)
+        : products.map((product) => 
+          <Card product={product}/>
+        )}
     </div>
   )
 }
