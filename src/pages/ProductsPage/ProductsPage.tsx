@@ -49,7 +49,7 @@ const ProductsPage = () => {
 
     const getAllIds = async () => {
         try {
-            const response = await axios(`http://api.valantis.store:40000/`, {
+            const response = await axios(`https://api.valantis.store:41000/`, {
             method: 'POST',
             headers: {
                 'X-Auth' : md5(`Valantis_${formattedDate}`)
@@ -69,7 +69,7 @@ const ProductsPage = () => {
         setIsloading(true)
         setIsFilter(false)
         try {
-            const response = await axios(`http://api.valantis.store:40000/`, {
+            const response = await axios(`https://api.valantis.store:41000/`, {
             method: 'POST',
             headers: {
                 'X-Auth' : md5(`Valantis_${formattedDate}`)
@@ -88,7 +88,7 @@ const ProductsPage = () => {
       
     const getProducts = async (ids: string[]) => {
         try {
-            const response = await axios(`http://api.valantis.store:40000/`, {
+            const response = await axios(`https://api.valantis.store:41000/`, {
             method: 'POST',
             headers: {
                 'X-Auth' : md5(`Valantis_${formattedDate}`)
@@ -108,7 +108,7 @@ const ProductsPage = () => {
 
     const getBrands = async () => {
         try {
-            const response = await axios(`http://api.valantis.store:40000/`, {
+            const response = await axios(`https://api.valantis.store:41000/`, {
             method: 'POST',
             headers: {
                 'X-Auth' : md5(`Valantis_${formattedDate}`)
@@ -133,7 +133,7 @@ const ProductsPage = () => {
         setIsFilter(true)
         setCurrentOffset(0)
         try {
-            const response = await axios(`http://api.valantis.store:40000/`, {
+            const response = await axios(`https://api.valantis.store:41000/`, {
                 method: 'POST',
                 headers: {
                     'X-Auth' : md5(`Valantis_${formattedDate}`)

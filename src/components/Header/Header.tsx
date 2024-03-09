@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react"
 import styles from "./Header.module.scss"
 
 const Header = () => {
