@@ -1,0 +1,28 @@
+@import "../../styles/variables.scss";
+@import "../../styles/mixins.scss";
+
+.pagination {
+    width: 100%;
+    height: 60px;
+    // background-color: red;
+
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+
+    &__item {
+        border: 2px solid $brand;
+        border-radius: $border-radius;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 150px;
+        cursor: pointer;
+
+        &-disabled {
+            cursor: default;
+            background-color: $brand-disabled;
+            border-color: $brand-disabled;
+        }
+    }
+}

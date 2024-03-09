@@ -8,6 +8,7 @@ import MultiDropdown from 'components/MultiDropdown';
 import Input from 'components/Input';
 import Button from 'components/Button'
 import SliderFilter from 'components/Slider';
+import Pagination from 'components/Pagination';
 import { ProductData } from '../../../types';
 import { OptionData } from '../../../types';
 
@@ -19,12 +20,33 @@ const ProductsPage = () => {
     const [brandValue, setBrandValue] = useState<OptionData[]>([])
     const [sliderValue, setSliderValue] = useState(100);
     const [isLoading, setIsloading] = useState(true)
+    const [itemsCount, setItemsCount] = useState(0)
+
+    const limit = 50
+
     const date = new Date();
     const year = date.getUTCFullYear();
     const month = date.getUTCMonth() +  1;
     const day = date.getUTCDate();
     
     const formattedDate = `${year}${month <  10 ? '0' : ''}${month}${day <  10 ? '0' : ''}${day}`
+
+    const getAllIds = async () => {
+        try {
+            const response = await axios(`http://api.valantis.store:40000/`, {
+            method: 'POST',
+            headers: {
+                'X-Auth' : md5(`Valantis_${formattedDate}`)
+            },
+            data: {
+                "action": "get_ids"
+            }
+        })
+        setItemsCount(response.data.result.length)
+        } catch (error) {
+            throw error
+        }
+    }
 
     const getProductsIds = async () => {
         setIsloading(true)
@@ -36,7 +58,7 @@ const ProductsPage = () => {
             },
             data: {
                 "action": "get_ids",
-                "params": {"offset": currentOffset, "limit": 50}
+                "params": {"offset": currentOffset, "limit": limit}
             }
         })
         getProducts(response.data.result)
@@ -141,9 +163,31 @@ const ProductsPage = () => {
     }
 
     useEffect(() => {
-        getProductsIds()
+        getAllIds()
         getBrands()
     }, [])
+
+    useEffect(() => {
+        getProductsIds()
+    }, [currentOffset])
+
+    const onFirstButtonClick = () => {
+        setCurrentOffset(0)
+    }
+    
+    const onPrevButtonClick = () => {
+        setCurrentOffset(currentOffset - limit)
+    }
+
+    const onNextButtonClick = () => {
+        setCurrentOffset(currentOffset + limit )
+    }
+
+    const onLastButtonClick = () => {
+        setCurrentOffset((Math.ceil(itemsCount / limit) - 1) * 50)
+        console.log(itemsCount)
+        console.log( Math.ceil(itemsCount / limit))
+    }
 
     return (
         <div className={styles.product__page}> 
@@ -168,7 +212,16 @@ const ProductsPage = () => {
                         <Button className={styles['product__page-filter-btn']} onClick={() => clearData()}>Очистить</Button>
                     </div>
                 </div>
-                {products !== null && <CardsList isLoading={isLoading} products={products}/>}
+                {<CardsList isLoading={isLoading} products={products}/>}
+                {products.length === 0 && !isLoading && <h3 className={styles['product__page-subtitle']}>Такого объекта не найдено...</h3>}
+                <Pagination
+                pageCount={Math.ceil(itemsCount / 50)}
+                onFirstButtonClick={onFirstButtonClick}
+                onPrevButtonClick={onPrevButtonClick}
+                onNextButtonClick={onNextButtonClick}
+                onLastButtonClick={onLastButtonClick}
+                currentPage={Math.ceil(currentOffset / limit)}
+                />
             </div>
         </div>
     )
