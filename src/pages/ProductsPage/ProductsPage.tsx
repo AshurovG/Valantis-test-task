@@ -21,6 +21,8 @@ const ProductsPage = () => {
     const [sliderValue, setSliderValue] = useState(100);
     const [isLoading, setIsloading] = useState(true)
     const [itemsCount, setItemsCount] = useState(0)
+    const [filteredItemsCount, setFilteredItemsCount] = useState(0)
+    const [isFilter, setIsFilter] = useState(false)
 
     const limit = 50
 
@@ -30,6 +32,20 @@ const ProductsPage = () => {
     const day = date.getUTCDate();
     
     const formattedDate = `${year}${month <  10 ? '0' : ''}${month}${day <  10 ? '0' : ''}${day}`
+
+    const getUniqueProductsIds = (ids: string[]) => { // Возвращает массив уникальных ID
+        const uniqueIds = [];
+        const seenIds = new Set();
+    
+        for (const id of ids) {
+            if (!seenIds.has(id)) {
+                seenIds.add(id);
+                uniqueIds.push(id);
+            }
+        }
+    
+        return uniqueIds;
+    };
 
     const getAllIds = async () => {
         try {
@@ -44,12 +60,14 @@ const ProductsPage = () => {
         })
         setItemsCount(response.data.result.length)
         } catch (error) {
-            throw error
+            console.error("Ошибка сервера:", error);
+            getAllIds() // Long polling
         }
     }
 
     const getProductsIds = async () => {
         setIsloading(true)
+        setIsFilter(false)
         try {
             const response = await axios(`http://api.valantis.store:40000/`, {
             method: 'POST',
@@ -61,9 +79,10 @@ const ProductsPage = () => {
                 "params": {"offset": currentOffset, "limit": limit}
             }
         })
-        getProducts(response.data.result)
+        getProducts(getUniqueProductsIds(response.data.result))
         } catch (error) {
-            throw error
+            console.error("Ошибка сервера:", error);
+            getProductsIds()
         }
     }
       
@@ -83,7 +102,7 @@ const ProductsPage = () => {
         setIsloading(false)
         setProducts(response.data.result)
         } catch (error) {
-            throw error
+            console.error("Ошибка сервера:", error);
         }
     }
 
@@ -104,12 +123,15 @@ const ProductsPage = () => {
         const brandsAsKeyValueObjects = uniqueBrands.map((brand: string) => ({ key: brand, value: brand }));
         setAllBrands(brandsAsKeyValueObjects);
         } catch (error) {
-            throw error
+            console.error("Ошибка сервера:", error);
+            getBrands()
         }
     }
 
     const filterProducts = async (option: OptionData) => {
         setIsloading(true)
+        setIsFilter(true)
+        setCurrentOffset(0)
         try {
             const response = await axios(`http://api.valantis.store:40000/`, {
                 method: 'POST',
@@ -121,9 +143,10 @@ const ProductsPage = () => {
                     "params": { [option.key]: option.value, "offset": 0, "limit": 50 }
                 }
             })
-            getProducts(response.data.result)
+            getProducts(getUniqueProductsIds(response.data.result))
+            setFilteredItemsCount(response.data.result.length)
         } catch (error) {
-            throw error
+            console.error("Ошибка сервера:", error);
         }
     }
 
@@ -145,7 +168,10 @@ const ProductsPage = () => {
     };
 
     const handleSearchButtonClick = () => {
-        if (sliderValue !== 100 && !titleValue && brandValue.length === 0) {
+        if (sliderValue === 100 && !titleValue && brandValue.length === 0) {
+            getProductsIds()
+        }
+        else if (sliderValue !== 100 && !titleValue && brandValue.length === 0) {
             filterProducts({key: 'price', value: sliderValue})
         } else if (sliderValue === 100 && titleValue && brandValue.length === 0) {
             filterProducts({key: 'product', value: titleValue})
@@ -168,8 +194,12 @@ const ProductsPage = () => {
     }, [])
 
     useEffect(() => {
-        getProductsIds()
+        if (!isFilter) {
+            getProductsIds()
+        }
     }, [currentOffset])
+
+    // Для фильтрации пагинация сделана без offset - API не позволяет
 
     const onFirstButtonClick = () => {
         setCurrentOffset(0)
@@ -184,9 +214,11 @@ const ProductsPage = () => {
     }
 
     const onLastButtonClick = () => {
-        setCurrentOffset((Math.ceil(itemsCount / limit) - 1) * 50)
-        console.log(itemsCount)
-        console.log( Math.ceil(itemsCount / limit))
+        if (isFilter) {
+            setCurrentOffset((Math.ceil(filteredItemsCount / limit) - 1) * 50)
+        } else {
+            setCurrentOffset((Math.ceil(itemsCount / limit) - 1) * 50)
+        }
     }
 
     return (
@@ -195,6 +227,7 @@ const ProductsPage = () => {
                 <h1 className={styles['product__page-title']}>Наши продукты</h1>
                 <h3 className={styles['product__page-subtitle']}>Здесь вы можете ознакомиться с продукцией нашей компании! У нас много скидок и новинок</h3>
                 <h3 className={styles['product__page-caption']}>У вас есть возможность отфильтровать продукты по одному из признаков</h3>
+
                 <div className={styles['product__page-filter']}>
                     <div className={styles['product__page-filter-search']}>
                         <Input className={styles['product__page-filter-input']} value={titleValue} placeholder='Название товара*' onChange={setTitleValue}/>
@@ -207,21 +240,32 @@ const ProductsPage = () => {
                             title="Цена товара:"
                         />
                     </div>
+
                     <div className={styles['product__page-filter-btns']}>
                         <Button className={styles['product__page-filter-btn']} onClick={handleSearchButtonClick}>Найти</Button>
                         <Button className={styles['product__page-filter-btn']} onClick={() => clearData()}>Очистить</Button>
                     </div>
                 </div>
-                {<CardsList isLoading={isLoading} products={products}/>}
-                {products.length === 0 && !isLoading && <h3 className={styles['product__page-subtitle']}>Такого объекта не найдено...</h3>}
-                <Pagination
-                pageCount={Math.ceil(itemsCount / 50)}
-                onFirstButtonClick={onFirstButtonClick}
-                onPrevButtonClick={onPrevButtonClick}
-                onNextButtonClick={onNextButtonClick}
-                onLastButtonClick={onLastButtonClick}
-                currentPage={Math.ceil(currentOffset / limit)}
-                />
+
+                {!isFilter ? 
+                    <CardsList isLoading={isLoading} products={products}/>
+                    : <CardsList isLoading={isLoading} products={products.slice(currentOffset, currentOffset + limit)}/>
+                }
+
+                {products.length === 0 && !isLoading && 
+                    <h3 className={styles['product__page-subtitle']}>
+                        Такого объекта не найдено...
+                    </h3>
+                }
+
+                {!isLoading && <Pagination
+                    pageCount={isFilter ? Math.ceil(filteredItemsCount / limit) : Math.ceil(itemsCount / limit)}
+                    onFirstButtonClick={onFirstButtonClick}
+                    onPrevButtonClick={onPrevButtonClick}
+                    onNextButtonClick={onNextButtonClick}
+                    onLastButtonClick={onLastButtonClick}
+                    currentPage={Math.ceil(currentOffset / limit)}
+                />}
             </div>
         </div>
     )

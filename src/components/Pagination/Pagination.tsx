@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import styles from './Pagination.module.scss'
 
 type PaginationProps = {
@@ -29,9 +29,9 @@ const Pagination: React.FC<PaginationProps> = ({pageCount, currentPage, onFirstB
                 Следующая
             </div>
 
-            <div className={styles.pagination__item} onClick={onLastButtonClick}>
-                {pageCount - 1} страница
-            </div>
+           {pageCount !== 1 && <div className={styles.pagination__item} onClick={onLastButtonClick}>
+                {pageCount} страница
+            </div>}
         </div>
     )
 }
